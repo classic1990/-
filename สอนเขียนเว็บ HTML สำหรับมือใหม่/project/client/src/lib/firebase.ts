@@ -44,6 +44,7 @@ const firebaseConfig = {
 const app: FirebaseApp = initializeApp(firebaseConfig);
 export const db: Firestore = getFirestore(app);
 export const auth: Auth = getAuth(app);
+const projectId = firebaseConfig.projectId;
 
 // Admin email constant
 export const ADMIN_EMAIL: string = "duy.kan1234@gmail.com";
@@ -69,7 +70,14 @@ export interface Movie {
 }
 
 // Collection references
-export const artifactsCollection = collection(db, "artifacts");
+const moviesCollection = collection(
+  db,
+  "artifacts",
+  projectId,
+  "public",
+  "data",
+  "movies"
+);
 
 // Authentication functions
 export const loginWithGoogle = () => {
@@ -88,7 +96,7 @@ export const onAuthChange = (callback: (user: User | null) => void) => {
 // Firestore operations
 export const getMovies = async (): Promise<(Movie & { id: string })[]> => {
   try {
-    const q = query(artifactsCollection);
+    const q = query(moviesCollection);
     const snapshot: QuerySnapshot<DocumentData> = await getDocs(q);
     const movies = snapshot.docs.map(
       (docSnapshot: DocumentSnapshot<DocumentData>) => ({
@@ -113,7 +121,7 @@ export const getMovies = async (): Promise<(Movie & { id: string })[]> => {
 export const subscribeToMovies = (
   callback: (movies: (Movie & { id: string })[]) => void
 ) => {
-  const q = query(artifactsCollection);
+  const q = query(moviesCollection, orderBy("createdAt", "desc"));
   return onSnapshot(
     q,
     (snapshot: QuerySnapshot<DocumentData>) => {
@@ -123,13 +131,6 @@ export const subscribeToMovies = (
           ...docSnapshot.data(),
         })
       ) as (Movie & { id: string })[];
-
-      movies.sort((a, b) => {
-        const dateA = a.createdAt?.toDate() ?? new Date(0);
-        const dateB = b.createdAt?.toDate() ?? new Date(0);
-        return dateB.getTime() - dateA.getTime();
-      });
-
       callback(movies);
     },
     error => {
@@ -143,7 +144,7 @@ export const addMovie = async (
   movie: Omit<Movie, "id" | "createdAt" | "updatedAt" | "viewCount">
 ): Promise<string> => {
   try {
-    const docRef = await addDoc(artifactsCollection, {
+    const docRef = await addDoc(moviesCollection, {
       ...movie,
       viewCount: 0,
       createdAt: serverTimestamp(),
@@ -161,7 +162,15 @@ export const updateMovie = async (
   movie: Partial<Movie>
 ): Promise<void> => {
   try {
-    const docRef = doc(db, "artifacts", id);
+    const docRef = doc(
+      db,
+      "artifacts",
+      projectId,
+      "public",
+      "data",
+      "movies",
+      id
+    );
     await updateDoc(docRef, {
       ...movie,
       updatedAt: serverTimestamp(),
@@ -174,7 +183,15 @@ export const updateMovie = async (
 
 export const deleteMovie = async (id: string): Promise<void> => {
   try {
-    const docRef = doc(db, "artifacts", id);
+    const docRef = doc(
+      db,
+      "artifacts",
+      projectId,
+      "public",
+      "data",
+      "movies",
+      id
+    );
     await deleteDoc(docRef);
   } catch (error) {
     console.error("Error deleting movie:", error);
@@ -184,7 +201,15 @@ export const deleteMovie = async (id: string): Promise<void> => {
 
 export const incrementViewCount = async (id: string): Promise<void> => {
   try {
-    const docRef = doc(db, "artifacts", id);
+    const docRef = doc(
+      db,
+      "artifacts",
+      projectId,
+      "public",
+      "data",
+      "movies",
+      id
+    );
     const docSnapshot = await getDoc(docRef);
 
     if (docSnapshot.exists()) {
@@ -219,7 +244,16 @@ export interface Comment {
 }
 
 export const getCommentsRef = (movieId: string) =>
-  collection(db, "artifacts", movieId, "comments");
+  collection(
+    db,
+    "artifacts",
+    projectId,
+    "public",
+    "data",
+    "movies",
+    movieId,
+    "comments"
+  );
 
 export const subscribeToComments = (
   movieId: string,
