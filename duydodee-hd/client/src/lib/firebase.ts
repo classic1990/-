@@ -1,16 +1,16 @@
 import { initializeApp, type FirebaseApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs, getDoc, doc, updateDoc, deleteDoc, setDoc, query, orderBy, onSnapshot, serverTimestamp, Timestamp, type Firestore, type DocumentSnapshot, type QuerySnapshot, type DocumentData } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, getDoc, doc, updateDoc, deleteDoc, setDoc, query, onSnapshot, serverTimestamp, Timestamp, type Firestore, type DocumentSnapshot, type QuerySnapshot, type DocumentData } from "firebase/firestore";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, type Auth, type User } from "firebase/auth";
 
-// Firebase Configuration - ใช้ environment variables เท่านั้น
+// Firebase Configuration
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey: "AIzaSyBuhTA1YwcsNyxR0NLYW6JrxUQ9U7vyVeo",
+  authDomain: "classic-e8ab7.firebaseapp.com",
+  projectId: "classic-e8ab7",
+  storageBucket: "classic-e8ab7.appspot.com",
+  messagingSenderId: "596308927760",
+  appId: "1:596308927760:web:63043fd2786459082cb195",
+  measurementId: "G-RCDSPGQ5LE"
 };
 
 // Initialize Firebase
@@ -18,8 +18,8 @@ const app: FirebaseApp = initializeApp(firebaseConfig);
 export const db: Firestore = getFirestore(app);
 export const auth: Auth = getAuth(app);
 
-// Admin email constant - ใช้ environment variable
-export const ADMIN_EMAIL: string = import.meta.env.VITE_ADMIN_EMAIL;
+// Admin email constant
+export const ADMIN_EMAIL: string = "duy.kan1234@gmail.com";
 
 // Type definitions
 export interface Episode {
@@ -61,12 +61,20 @@ export const onAuthChange = (callback: (user: User | null) => void) => {
 // Firestore operations
 export const getMovies = async (): Promise<(Movie & { id: string })[]> => {
   try {
-    const q = query(artifactsCollection, orderBy("createdAt", "desc"));
+    const q = query(artifactsCollection);
     const snapshot: QuerySnapshot<DocumentData> = await getDocs(q);
-    return snapshot.docs.map((docSnapshot: DocumentSnapshot<DocumentData>) => ({
+    const movies = snapshot.docs.map((docSnapshot: DocumentSnapshot<DocumentData>) => ({
       id: docSnapshot.id,
       ...docSnapshot.data()
     })) as (Movie & { id: string })[];
+
+    movies.sort((a, b) => {
+      const dateA = a.createdAt?.toDate() ?? new Date(0);
+      const dateB = b.createdAt?.toDate() ?? new Date(0);
+      return dateB.getTime() - dateA.getTime();
+    });
+
+    return movies;
   } catch (error) {
     console.error("Error fetching movies:", error);
     throw error;
@@ -74,13 +82,20 @@ export const getMovies = async (): Promise<(Movie & { id: string })[]> => {
 };
 
 export const subscribeToMovies = (callback: (movies: (Movie & { id: string })[]) => void) => {
-  const q = query(artifactsCollection, orderBy("createdAt", "desc"));
+  const q = query(artifactsCollection);
   return onSnapshot(q, 
     (snapshot: QuerySnapshot<DocumentData>) => {
       const movies = snapshot.docs.map((docSnapshot: DocumentSnapshot<DocumentData>) => ({
         id: docSnapshot.id,
         ...docSnapshot.data()
       })) as (Movie & { id: string })[];
+
+      movies.sort((a, b) => {
+        const dateA = a.createdAt?.toDate() ?? new Date(0);
+        const dateB = b.createdAt?.toDate() ?? new Date(0);
+        return dateB.getTime() - dateA.getTime();
+      });
+
       callback(movies);
     },
     (error) => {

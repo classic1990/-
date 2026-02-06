@@ -132,18 +132,18 @@ export default function MovieDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-accent"></div>
       </div>
     );
   }
 
   if (!movie) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4">
-        <p className="text-slate-400 text-lg">ไม่พบหนังนี้</p>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
+        <p className="text-lg text-muted-foreground">ไม่พบหนังนี้</p>
         <Button onClick={() => setLocation("/")} className="gap-2">
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="h-4 w-4" />
           กลับไปหน้าแรก
         </Button>
       </div>
@@ -153,9 +153,9 @@ export default function MovieDetail() {
   const currentEpisode = movie.episodes?.[selectedEpisode];
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-40 backdrop-blur-md bg-slate-950/80 border-b border-slate-800 px-4 py-3">
+      <div className="sticky top-0 z-40 border-b border-border bg-background/80 px-4 py-3 backdrop-blur-md">
         <div className="container mx-auto flex items-center gap-4">
           <Button
             variant="ghost"
@@ -163,30 +163,30 @@ export default function MovieDetail() {
             onClick={() => setLocation("/")}
             className="gap-2"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="h-4 w-4" />
             กลับ
           </Button>
-          <h1 className="text-xl font-bold text-white flex-1 truncate">{movie.title}</h1>
+          <h1 className="flex-1 truncate text-xl font-bold text-foreground">{movie.title}</h1>
         </div>
       </div>
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {/* Poster */}
           <div className="md:col-span-1">
-            <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-slate-800 mb-4">
+            <div className="relative mb-4 aspect-[2/3] overflow-hidden rounded-lg bg-card">
               <img
                 src={movie.poster}
                 alt={movie.title}
-                className="w-full h-full object-cover"
+                className="h-full w-full object-cover"
                 onError={(e) => {
                   e.currentTarget.src =
                     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 600'%3E%3Crect fill='%231e293b' width='400' height='600'/%3E%3C/svg%3E";
                 }}
               />
               {movie.isVip && (
-                <div className="absolute top-4 left-4 bg-yellow-500 text-black px-3 py-1 rounded font-bold text-sm">
+                <div className="absolute left-4 top-4 rounded bg-yellow-500 px-3 py-1 text-sm font-bold text-black">
                   VIP
                 </div>
               )}
@@ -197,7 +197,7 @@ export default function MovieDetail() {
                 variant={isFavorite ? "default" : "outline"}
                 className="w-full gap-2"
               >
-                <Heart className={`w-4 h-4 ${isFavorite ? "fill-current" : ""}`} />
+                <Heart className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} />
                 {isFavorite ? "ลบออกจากรายการโปรด" : "เพิ่มเข้ารายการโปรด"}
               </Button>
               <ShareButton movie={movie} />
@@ -208,17 +208,17 @@ export default function MovieDetail() {
           <div className="md:col-span-2">
             {/* Title & Meta */}
             <div className="mb-6">
-              <h2 className="text-3xl font-bold text-white mb-2">{movie.title}</h2>
-              <div className="flex flex-wrap gap-2 mb-4">
+              <h2 className="mb-2 text-3xl font-bold text-foreground">{movie.title}</h2>
+              <div className="mb-4 flex flex-wrap gap-2">
                 {movie.badge && (
-                  <span className="bg-cyan-500 text-white px-3 py-1 rounded text-sm font-semibold">
+                  <span className="rounded bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
                     {movie.badge}
                   </span>
                 )}
-                <span className="bg-slate-800 text-slate-300 px-3 py-1 rounded text-sm">
+                <span className="rounded bg-muted px-3 py-1 text-sm text-muted-foreground">
                   {movie.category === "vertical" ? "ซีรีส์สั้น" : "ซีรีส์ยาว"}
                 </span>
-                <span className="bg-slate-800 text-slate-300 px-3 py-1 rounded text-sm">
+                <span className="rounded bg-muted px-3 py-1 text-sm text-muted-foreground">
                   👁 {movie.viewCount || 0} ครั้ง
                 </span>
               </div>
@@ -226,21 +226,21 @@ export default function MovieDetail() {
 
             {/* Description */}
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-white mb-2">เรื่องย่อ</h3>
-              <p className="text-slate-400 leading-relaxed">{movie.desc}</p>
+              <h3 className="mb-2 text-lg font-semibold text-foreground">เรื่องย่อ</h3>
+              <p className="leading-relaxed text-muted-foreground">{movie.desc}</p>
             </div>
 
             {/* Video Player */}
             {currentEpisode && (
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-white mb-3">
+                <h3 className="mb-3 text-lg font-semibold text-foreground">
                   ตอนที่ {selectedEpisode + 1}:{" "}
                   {currentEpisode.title || `ตอน ${selectedEpisode + 1}`}
                 </h3>
-                <div className="bg-black rounded-lg overflow-hidden aspect-video">
+                <div className="aspect-video overflow-hidden rounded-lg bg-black shadow-lg shadow-accent/20">
                   <iframe
                     src={currentEpisode.url}
-                    className="w-full h-full"
+                    className="h-full w-full"
                     allowFullScreen
                     allow="autoplay"
                   />
@@ -251,18 +251,18 @@ export default function MovieDetail() {
             {/* Episodes List */}
             {movie.episodes && movie.episodes.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-lg font-semibold text-white mb-3">
+                <h3 className="mb-3 text-lg font-semibold text-foreground">
                   ตอนทั้งหมด ({movie.episodes.length} ตอน)
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
                   {movie.episodes.map((ep, idx) => (
                     <button
                       key={idx}
                       onClick={() => setSelectedEpisode(idx)}
                       className={`p-3 rounded-lg font-semibold transition-all ${
                         selectedEpisode === idx
-                          ? "bg-cyan-500 text-white"
-                          : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                          ? "bg-accent text-accent-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
                       }`}
                     >
                       ตอน {idx + 1}
@@ -274,32 +274,32 @@ export default function MovieDetail() {
 
             {/* Comments Section */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                <MessageCircle className="w-5 h-5" />
+              <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold text-foreground">
+                <MessageCircle className="h-5 w-5" />
                 ความคิดเห็น ({comments.length})
               </h3>
 
               {user ? (
-                <form onSubmit={handleSubmitComment} className="flex gap-2 mb-4">
+                <form onSubmit={handleSubmitComment} className="mb-4 flex gap-2">
                   <Input
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     placeholder="แสดงความคิดเห็น..."
-                    className="flex-1 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                    className="flex-1"
                     disabled={isSubmittingComment}
                   />
                   <Button
                     type="submit"
                     size="icon"
-                    className="bg-cyan-500 hover:bg-cyan-600 shrink-0"
+                    className="shrink-0 bg-accent hover:bg-accent/90"
                     disabled={!commentText.trim() || isSubmittingComment}
                   >
-                    <Send className="w-4 h-4" />
+                    <Send className="h-4 w-4" />
                   </Button>
                 </form>
               ) : (
-                <div className="flex items-center gap-2 mb-4">
-                  <p className="text-slate-500 text-sm">กรุณาเข้าสู่ระบบเพื่อแสดงความคิดเห็น</p>
+                <div className="mb-4 flex items-center gap-2">
+                  <p className="text-sm text-muted-foreground">กรุณาเข้าสู่ระบบเพื่อแสดงความคิดเห็น</p>
                   <Button
                     size="sm"
                     variant="outline"
@@ -313,24 +313,24 @@ export default function MovieDetail() {
 
               <div className="space-y-3">
                 {comments.length === 0 ? (
-                  <p className="text-slate-500 text-sm py-4">ยังไม่มีความคิดเห็น</p>
+                  <p className="py-4 text-sm text-muted-foreground">ยังไม่มีความคิดเห็น</p>
                 ) : (
                   comments.map((c) => (
                     <div
                       key={c.id}
-                      className="flex gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50"
+                      className="flex gap-3 rounded-lg border border-border bg-card p-3"
                     >
                       <Avatar className="h-9 w-9 shrink-0">
                         <AvatarImage src={c.userPhoto ?? undefined} />
-                        <AvatarFallback className="bg-slate-700 text-slate-300 text-sm">
+                        <AvatarFallback className="bg-muted text-sm text-muted-foreground">
                           {(c.userName || c.userEmail || "?").charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-300">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-muted-foreground">
                           {c.userName || c.userEmail || "ผู้ใช้"}
                         </p>
-                        <p className="text-white text-sm mt-0.5 break-words">{c.text}</p>
+                        <p className="mt-0.5 break-words text-sm text-foreground">{c.text}</p>
                       </div>
                     </div>
                   ))

@@ -160,23 +160,23 @@ export default function AdminPanel() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-accent"></div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 flex items-center justify-center px-4">
-        <Card className="w-full max-w-md bg-slate-900 border-slate-800">
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl text-white">Admin Access</CardTitle>
+            <CardTitle className="text-2xl">Admin Access</CardTitle>
             <CardDescription>เข้าสู่ระบบเพื่อจัดการเนื้อหา</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={handleLogin} className="w-full gap-2 bg-cyan-500 hover:bg-cyan-600">
-              <LogIn className="w-4 h-4" />
+            <Button onClick={handleLogin} className="w-full gap-2">
+              <LogIn className="h-4 w-4" />
               เข้าสู่ระบบด้วย Google
             </Button>
           </CardContent>
@@ -187,18 +187,18 @@ export default function AdminPanel() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900 flex items-center justify-center px-4">
-        <Card className="w-full max-w-md bg-slate-900 border-slate-800">
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl text-white">Access Denied</CardTitle>
+            <CardTitle className="text-2xl">Access Denied</CardTitle>
             <CardDescription>คุณไม่มีสิทธิ์เข้าถึงหน้านี้</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-slate-400 mb-4">
+            <p className="mb-4 text-sm text-muted-foreground">
               เฉพาะ {ADMIN_EMAIL} เท่านั้นที่สามารถเข้าถึงระบบจัดการได้
             </p>
             <Button onClick={handleLogout} className="w-full gap-2">
-              <LogOut className="w-4 h-4" />
+              <LogOut className="h-4 w-4" />
               ออกจากระบบ
             </Button>
           </CardContent>
@@ -208,15 +208,15 @@ export default function AdminPanel() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="sticky top-0 z-40 backdrop-blur-md bg-slate-950/80 border-b border-slate-800">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
+      <div className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
+        <div className="container mx-auto flex items-center justify-between px-4 py-4">
+          <h1 className="text-2xl font-bold">Admin Panel</h1>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-400">{user.email}</span>
+            <span className="text-sm text-muted-foreground">{user.email}</span>
             <Button onClick={handleLogout} variant="outline" size="sm" className="gap-2">
-              <LogOut className="w-4 h-4" />
+              <LogOut className="h-4 w-4" />
               ออกจากระบบ
             </Button>
           </div>
@@ -225,51 +225,47 @@ export default function AdminPanel() {
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Form */}
           <div className="lg:col-span-1">
-            <Card className="bg-slate-900 border-slate-800 sticky top-24">
+            <Card className="sticky top-24">
               <CardHeader>
-                <CardTitle className="text-white">
-                  {editingId ? "แก้ไขหนัง" : "เพิ่มหนังใหม่"}
-                </CardTitle>
+                <CardTitle>{editingId ? "แก้ไขหนัง" : "เพิ่มหนังใหม่"}</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-slate-300 block mb-2">
+                    <label className="mb-2 block text-sm font-medium">
                       ชื่อเรื่อง *
                     </label>
                     <Input
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       placeholder="ชื่อหนัง"
-                      className="bg-slate-800 border-slate-700 text-white"
                     />
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-slate-300 block mb-2">
+                    <label className="mb-2 block text-sm font-medium">
                       เรื่องย่อ
                     </label>
                     <Textarea
                       value={formData.desc}
                       onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
                       placeholder="เรื่องย่อ"
-                      className="bg-slate-800 border-slate-700 text-white"
                       rows={3}
                     />
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-slate-300 block mb-2">
+                    <label className="mb-2 block text-sm font-medium">
                       หมวดหมู่
                     </label>
                     <Select value={formData.category} onValueChange={(val) => setFormData({ ...formData, category: val as any })}>
-                      <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                      <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-800 border-slate-700">
+                      <SelectContent>
                         <SelectItem value="vertical">ซีรีส์สั้น (แนวตั้ง)</SelectItem>
                         <SelectItem value="series">ซีรีส์ยาว (พากย์ไทย)</SelectItem>
                       </SelectContent>
@@ -277,7 +273,7 @@ export default function AdminPanel() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-slate-300 block mb-2">
+                    <label className="mb-2 block text-sm font-medium">
                       URL รูปโปสเตอร์ *
                     </label>
                     <Input
@@ -285,19 +281,17 @@ export default function AdminPanel() {
                       value={formData.poster}
                       onChange={(e) => setFormData({ ...formData, poster: e.target.value })}
                       placeholder="https://..."
-                      className="bg-slate-800 border-slate-700 text-white"
                     />
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-slate-300 block mb-2">
+                    <label className="mb-2 block text-sm font-medium">
                       ป้ายกำกับ (Badge)
                     </label>
                     <Input
                       value={formData.badge}
                       onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
                       placeholder="เช่น พากย์ไทย"
-                      className="bg-slate-800 border-slate-700 text-white"
                     />
                   </div>
 
@@ -307,20 +301,20 @@ export default function AdminPanel() {
                       onCheckedChange={(checked) => setFormData({ ...formData, isVip: checked as boolean })}
                       id="vip"
                     />
-                    <label htmlFor="vip" className="text-sm font-medium text-slate-300 cursor-pointer">
+                    <label htmlFor="vip" className="cursor-pointer text-sm font-medium">
                       จำกัดเฉพาะสมาชิก VIP
                     </label>
                   </div>
 
                   <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="text-sm font-medium text-slate-300">ตอน ({formData.episodes.length})</label>
+                    <div className="mb-2 flex items-center justify-between">
+                      <label className="text-sm font-medium">ตอน ({formData.episodes.length})</label>
                       <Button type="button" onClick={handleAddEpisode} size="sm" variant="outline" className="gap-1">
-                        <Plus className="w-3 h-3" />
+                        <Plus className="h-3 w-3" />
                         เพิ่ม
                       </Button>
                     </div>
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                    <div className="max-h-40 space-y-2 overflow-y-auto">
                       {formData.episodes.map((ep, idx) => (
                         <div key={idx} className="flex gap-2">
                           <Input
@@ -332,7 +326,7 @@ export default function AdminPanel() {
                               setFormData({ ...formData, episodes: newEps });
                             }}
                             placeholder="URL วิดีโอ"
-                            className="bg-slate-800 border-slate-700 text-white text-xs"
+                            className="text-xs"
                           />
                           <Button
                             type="button"
@@ -348,7 +342,7 @@ export default function AdminPanel() {
                   </div>
 
                   <div className="flex gap-2 pt-4">
-                    <Button type="submit" className="flex-1 bg-cyan-500 hover:bg-cyan-600">
+                    <Button type="submit" className="flex-1">
                       {editingId ? "อัปเดต" : "เพิ่ม"}
                     </Button>
                     {editingId && (
@@ -379,31 +373,31 @@ export default function AdminPanel() {
 
           {/* Movies List */}
           <div className="lg:col-span-2">
-            <Card className="bg-slate-900 border-slate-800">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white">รายการหนังทั้งหมด ({movies.length})</CardTitle>
+                <CardTitle>รายการหนังทั้งหมด ({movies.length})</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                <div className="max-h-[600px] space-y-3 overflow-y-auto">
                   {movies.length === 0 ? (
-                    <p className="text-slate-400 text-center py-8">ยังไม่มีหนัง</p>
+                    <p className="py-8 text-center text-muted-foreground">ยังไม่มีหนัง</p>
                   ) : (
                     movies.map(movie => (
-                      <div key={movie.id} className="bg-slate-800 p-4 rounded-lg flex gap-4 items-start">
+                      <div key={movie.id} className="flex items-start gap-4 rounded-lg bg-muted/50 p-4">
                         <img
                           src={movie.poster}
                           alt={movie.title}
-                          className="w-12 h-16 object-cover rounded"
+                          className="h-16 w-12 rounded object-cover"
                           onError={(e) => {
                             e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 150'%3E%3Crect fill='%231e293b' width='100' height='150'/%3E%3C/svg%3E";
                           }}
                         />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-white truncate">{movie.title}</h4>
-                          <p className="text-xs text-slate-400">
+                        <div className="min-w-0 flex-1">
+                          <h4 className="truncate font-semibold">{movie.title}</h4>
+                          <p className="text-xs text-muted-foreground">
                             {movie.episodes?.length || 0} ตอน • {movie.category === "vertical" ? "สั้น" : "ยาว"}
                           </p>
-                          {movie.isVip && <span className="text-xs bg-yellow-500 text-black px-2 py-0.5 rounded mt-1 inline-block">VIP</span>}
+                          {movie.isVip && <span className="mt-1 inline-block rounded bg-yellow-500 px-2 py-0.5 text-xs text-black">VIP</span>}
                         </div>
                         <div className="flex gap-2">
                           <Button
@@ -411,14 +405,14 @@ export default function AdminPanel() {
                             size="sm"
                             variant="outline"
                           >
-                            <Edit2 className="w-4 h-4" />
+                            <Edit2 className="h-4 w-4" />
                           </Button>
                           <Button
                             onClick={() => handleDelete(movie.id)}
                             size="sm"
                             variant="destructive"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>

@@ -1,3 +1,4 @@
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -63,19 +64,19 @@
   --secondary-foreground: oklch(0.95 0.001 280);
   --muted: oklch(0.25 0.01 280);
   --muted-foreground: oklch(0.7 0.01 280);
-  --accent: oklch(0.5 0.15 200);
+  --accent: oklch(0.6 0.2 280);
   --accent-foreground: oklch(0.98 0.001 280);
   --destructive: oklch(0.6 0.2 30);
   --destructive-foreground: oklch(0.98 0.001 280);
   --border: oklch(0.2 0.01 280);
   --input: oklch(0.15 0.01 280);
-  --ring: oklch(0.5 0.15 200);
+  --ring: oklch(0.6 0.2 280);
   --sidebar: oklch(0.12 0.01 280);
   --sidebar-foreground: oklch(0.98 0.001 280);
-  --sidebar-accent: oklch(0.5 0.15 200);
+  --sidebar-accent: oklch(0.6 0.2 280);
   --sidebar-accent-foreground: oklch(0.98 0.001 280);
   --sidebar-border: oklch(0.2 0.01 280);
-  --sidebar-ring: oklch(0.5 0.15 200);
+  --sidebar-ring: oklch(0.6 0.2 280);
 }
 
 @layer base {
@@ -84,7 +85,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Prompt', sans-serif;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
