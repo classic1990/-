@@ -1,0 +1,44 @@
+---
+description: โครงสร้างและบริบทโปรเจกต์ DUYDODEE-HD
+alwaysApply: true
+---
+
+# DUYDODEE-HD Project Overview
+
+## โปรเจกต์คืออะไร
+เว็บดูหนังออนไลน์ (movie streaming) พร้อม Admin Panel สำหรับจัดการเนื้อหา
+
+## Tech Stack
+- **Frontend**: React 19, TypeScript, Vite
+- **Styling**: Tailwind CSS 4, shadcn/ui (Radix UI)
+- **Routing**: wouter
+- **Backend/DB**: Firebase (Firestore + Auth)
+- **Package Manager**: pnpm
+
+## โครงสร้างโฟลเดอร์
+```
+client/src/
+├── pages/       # หน้า Home, MovieDetail, AdminPanel, NotFound
+├── components/  # UI components (ui/ = shadcn), MovieCard, ShareButton, etc.
+├── lib/         # firebase.ts, share.ts, utils.ts
+├── hooks/       # usePersistFn, useMobile, useComposition
+├── contexts/    # ThemeContext
+└── main.tsx, App.tsx
+shared/          # ค่าคงที่ร่วมกัน
+server/          # Express static server (production)
+```
+
+## Path Aliases
+- `@/*` → `client/src/*`
+- `@shared/*` → `shared/*`
+
+## Design System
+- **Primary**: Cyan (#00e5ff)
+- **VIP Badge**: Gold (#ffd700)
+- **Theme**: Dark mode เป็นหลัก (slate-950, slate-900)
+- **ภาษา**: รองรับภาษาไทย
+
+## สิ่งที่ต้องจำ
+- ใช้ functional components เท่านั้น
+- หลีกเลี่ยง `any` - ใช้ type จาก Firebase หรือกำหนดเอง
+- ข้อความ UI ส่วนใหญ่เป็นภาษาไทย

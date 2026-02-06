@@ -1,0 +1,37 @@
+---
+description: มาตรฐาน TypeScript และ React
+globs: client/src/**/*.ts, client/src/**/*.tsx
+alwaysApply: false
+---
+
+# TypeScript & React Standards
+
+## TypeScript
+- เปิด `strict` mode แล้ว - ต้อง type ให้ครบ
+- หลีกเลี่ยง `any` - ใช้ `User | null`, `Movie & { id: string }` แทน
+- ใช้ `import type` สำหรับ type-only imports
+- Return type ของ async function ระบุให้ชัดเจน (`Promise<T>`)
+
+## React Patterns
+- ใช้ functional components เท่านั้น
+- Custom hooks สำหรับ logic ที่ใช้ซ้ำ (เช่น usePersistFn)
+- ใช้ `useEffect` cleanup (return unsubscribe) เมื่อ subscribe ข้อมูล
+
+## Error Handling
+```typescript
+// ❌ BAD
+incrementViewCount(id).catch(console.error);
+
+// ✅ GOOD - แสดง toast ให้ผู้ใช้เห็น
+try {
+  await incrementViewCount(id);
+} catch (error) {
+  console.error("Error:", error);
+  toast.error("เกิดข้อผิดพลาด");
+}
+```
+
+## Imports
+- Components จาก `@/components/ui/*` หรือ `@/components/*`
+- Firebase จาก `@/lib/firebase`
+- Utils จาก `@/lib/utils` (cn, etc.)

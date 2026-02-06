@@ -1,0 +1,28 @@
+---
+description: Routing และโครงสร้างหน้า
+globs: client/src/App.tsx, client/src/pages/**/*.tsx
+alwaysApply: false
+---
+
+# Routing & Pages
+
+## Routes (wouter)
+- `/` → Home
+- `/movie/:id` → MovieDetail
+- `/admin` → AdminPanel
+- `/404` → NotFound
+- Fallback → NotFound
+
+## Pages
+- **Home**: subscribeToMovies, search, filter by category (all/vertical/series)
+- **MovieDetail**: getMovies + find by id, episodes, favorite (localStorage), ShareButton
+- **AdminPanel**: onAuthChange, Google login, CRUD movies (Admin only)
+- **NotFound**: ปุ่มกลับหน้าแรก
+
+## Navigation
+- ใช้ `useLocation()` จาก wouter: `const [, setLocation] = useLocation()`
+- เปลี่ยนหน้า: `setLocation("/movie/123")`
+
+## Admin Access
+- ตรวจสอบ `user?.email === ADMIN_EMAIL`
+- ถ้าไม่ใช่ admin แสดง "Access Denied" และปุ่ม logout

@@ -1,0 +1,36 @@
+---
+description: Firebase และ Firestore conventions
+globs: client/src/lib/firebase.ts, firestore.rules, **/firebase*.ts
+alwaysApply: false
+---
+
+# Firebase Conventions
+
+## Collection Structure
+- **artifacts/{movieId}** - เก็บหนัง/ซีรีส์
+  - `title`, `desc`, `category` (vertical|series), `poster`, `badge`, `isVip`
+  - `episodes: [{ url, title? }]`, `viewCount`, `createdAt`, `updatedAt`
+  - **artifacts/{movieId}/comments/{commentId}** - คอมเมนต์ต่อหนัง
+- **users/{userId}** - ข้อมูลผู้ใช้
+  - **users/{userId}/favorites/{favId}** - รายการโปรด
+
+## Config
+- ใช้ `import.meta.env.VITE_FIREBASE_*` พร้อม fallback
+- Admin email: `VITE_ADMIN_EMAIL` หรือ `duy.kan1234@gmail.com`
+
+## Firestore Operations
+- `getMovies()` - ดึงทั้งหมดเรียงตาม createdAt
+- `subscribeToMovies(callback)` - real-time, ใช้ใน Home
+- `addMovie`, `updateMovie`, `deleteMovie` - Admin only
+- `incrementViewCount(id)` - ใช้ getDoc แทน getDocs (performance)
+
+## Security Rules (firestore.rules)
+- **artifacts**: Read=Public, Create/Delete=Admin, Update=Admin หรือ viewCount+1 เท่านั้น
+- **artifacts/{movieId}/comments**: Read=Public, Create=ต้องล็อกอิน
+- **users/{userId}**: Read/Write=เจ้าของเท่านั้น
+- **users/{userId}/favorites**: Read/Write=เจ้าของเท่านั้น
+- **Default**: deny all อื่นๆ
+
+## อย่า
+- Hardcode API key โดยไม่มี fallback
+- ใช้ getDocs ทั้ง collection เพื่อหา doc เดียว - ใช้ getDoc(docRef) แทน

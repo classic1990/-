@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- ฟังก์ชันช่วยเหลือ (Helper Functions) ---
+
+    // ตรวจสอบว่าเป็นเจ้าของบัญชี (คุณรัชชานนท์) หรือไม่
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'duy.kan1234@gmail.com';
+    }
+
+    // --- กฎสำหรับคอลเลกชันหนัง (Movies/Artifacts) ---
+
+    match /artifacts/{movieId} {
+      // 1. อนุญาตให้ "ทุกคน" (รวมถึงคนไม่ล็อคอิน) อ่านข้อมูลหนังได้
+      allow read: if true;
+
+      // 2. การสร้าง (Create) หรือ ลบ (Delete) หนัง ต้องเป็น Admin เท่านั้น
+      allow create, delete: if isAdmin();
+      
+      // 3. การอัปเดต (Update) ข้อมูลทำได้ 2 กรณี:
+      //    - เป็น Admin (แก้ไขได้ทุกฟิลด์)
+      //    - หรือ เป็นการเพิ่มยอดวิวทีละ 1 (โดยผู้ใช้ทั่วไป)
+      allow update: if isAdmin() || 
+                    (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']) &&
+                     request.resource.data.viewCount == resource.data.viewCount + 1);
+
+      // --- กฎสำหรับความคิดเห็น (Comments) ที่อยู่ใต้หนังแต่ละเรื่อง ---
+      match /comments/{commentId} {
+        // ทุกคนสามารถอ่านคอมเมนต์ได้
+        allow read: if true; 
+        // ต้องล็อกอินถึงจะคอมเมนต์ได้
+        allow create: if request.auth != null; 
+      }
+    }
+
+    // --- กฎสำหรับคอลเลกชันผู้ใช้ (Users) ---
+
+    match /users/{userId} {
+      // อนุญาตให้ผู้ใช้ที่ล็อกอิน อ่านและเขียนข้อมูลของตัวเองได้เท่านั้น
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // อนุญาตให้ผู้ใช้จัดการรายการโปรด (favorites) ของตัวเอง
+      match /favorites/{favId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
+}

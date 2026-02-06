@@ -1,0 +1,31 @@
+---
+description: UI components และ Tailwind styling
+globs: client/src/**/*.tsx, client/src/**/*.css
+alwaysApply: false
+---
+
+# UI & Styling
+
+## UI Components
+- ใช้ shadcn/ui จาก `@/components/ui/*` (Button, Card, Input, Dialog, etc.)
+- ใช้ `cn()` จาก `@/lib/utils` สำหรับ merge classNames
+- ใช้ lucide-react สำหรับ icons
+
+## Tailwind Classes
+- **Background**: `bg-slate-950`, `bg-slate-900`, `bg-slate-800`
+- **Primary**: `bg-cyan-500`, `hover:bg-cyan-600`, `text-cyan-400`
+- **VIP**: `bg-yellow-500 text-black`
+- **Text**: `text-white`, `text-slate-400`, `text-slate-300`
+- **Border**: `border-slate-800`, `border-slate-700`
+
+## Layout
+- Container: `container mx-auto px-4`
+- Grid หนัง: `grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4`
+- Sticky header: `sticky top-0 z-50 backdrop-blur-md bg-slate-950/80`
+
+## Loading & Empty States
+- Spinner: `animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400`
+- Empty: แสดงข้อความ "ไม่พบ..." พร้อมปุ่มกลับ
+
+## Responsive
+- ใช้ `md:`, `lg:` breakpoints สำหรับ layout ที่เปลี่ยนตามขนาดหน้าจอ
