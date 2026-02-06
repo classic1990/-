@@ -1,0 +1,60 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+.report/
+
+# Runtime data
+*.cjs
+*.mjs
+*.d.ts
+
+# Directory for compiled output
+dist/
+build/
+
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging.local
+
+# Editor directories and files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+.Trashes
+thumbs.db
+
+# Testing
+coverage/
+.nyc_output/
+.vitest/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# Other
+*.tgz
+.eslintcache
+.prettierrc.json
+.prettierignore

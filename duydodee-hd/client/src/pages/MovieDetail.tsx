@@ -11,7 +11,7 @@ import {
   subscribeToFavorites,
   addFavorite,
   removeFavorite,
-  type Comment
+  type Comment,
 } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ import { ArrowLeft, Heart, MessageCircle, Send } from "lucide-react";
 import ShareButton from "@/components/ShareButton";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { convertYoutubeUrl } from "@/lib/utils";
 
 export default function MovieDetail() {
   const params = useParams();
@@ -34,7 +35,7 @@ export default function MovieDetail() {
   const [user, setUser] = useState(auth.currentUser);
 
   useEffect(() => {
-    const unsubAuth = onAuthChange((u) => setUser(u));
+    const unsubAuth = onAuthChange(u => setUser(u));
     return () => unsubAuth();
   }, []);
 
@@ -42,7 +43,7 @@ export default function MovieDetail() {
     const loadMovie = async () => {
       try {
         const movies = await getMovies();
-        const found = movies.find((m) => m.id === movieId);
+        const found = movies.find(m => m.id === movieId);
         if (found) {
           setMovie(found);
         }
@@ -69,7 +70,7 @@ export default function MovieDetail() {
       setIsFavorite(favorites.includes(movieId));
       return;
     }
-    const unsubFav = subscribeToFavorites(user.uid, (movieIds) => {
+    const unsubFav = subscribeToFavorites(user.uid, movieIds => {
       setIsFavorite(movieIds.includes(movieId));
     });
     return () => unsubFav();
@@ -100,7 +101,9 @@ export default function MovieDetail() {
         localStorage.setItem("favorites", JSON.stringify(favorites));
       }
       setIsFavorite(!isFavorite);
-      toast.success(isFavorite ? "ลบออกจากรายการโปรดแล้ว" : "เพิ่มเข้ารายการโปรดแล้ว");
+      toast.success(
+        isFavorite ? "ลบออกจากรายการโปรดแล้ว" : "เพิ่มเข้ารายการโปรดแล้ว"
+      );
     }
   };
 
@@ -118,7 +121,7 @@ export default function MovieDetail() {
         uid: user.uid,
         email: user.email,
         displayName: user.displayName,
-        photoURL: user.photoURL
+        photoURL: user.photoURL,
       });
       setCommentText("");
       toast.success("แสดงความคิดเห็นแล้ว");
@@ -166,7 +169,9 @@ export default function MovieDetail() {
             <ArrowLeft className="h-4 w-4" />
             กลับ
           </Button>
-          <h1 className="flex-1 truncate text-xl font-bold text-foreground">{movie.title}</h1>
+          <h1 className="flex-1 truncate text-xl font-bold text-foreground">
+            {movie.title}
+          </h1>
         </div>
       </div>
 
@@ -180,7 +185,7 @@ export default function MovieDetail() {
                 src={movie.poster}
                 alt={movie.title}
                 className="h-full w-full object-cover"
-                onError={(e) => {
+                onError={e => {
                   e.currentTarget.src =
                     "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 600'%3E%3Crect fill='%231e293b' width='400' height='600'/%3E%3C/svg%3E";
                 }}
@@ -197,7 +202,9 @@ export default function MovieDetail() {
                 variant={isFavorite ? "default" : "outline"}
                 className="w-full gap-2"
               >
-                <Heart className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} />
+                <Heart
+                  className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`}
+                />
                 {isFavorite ? "ลบออกจากรายการโปรด" : "เพิ่มเข้ารายการโปรด"}
               </Button>
               <ShareButton movie={movie} />
@@ -208,7 +215,9 @@ export default function MovieDetail() {
           <div className="md:col-span-2">
             {/* Title & Meta */}
             <div className="mb-6">
-              <h2 className="mb-2 text-3xl font-bold text-foreground">{movie.title}</h2>
+              <h2 className="mb-2 text-3xl font-bold text-foreground">
+                {movie.title}
+              </h2>
               <div className="mb-4 flex flex-wrap gap-2">
                 {movie.badge && (
                   <span className="rounded bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
@@ -226,8 +235,12 @@ export default function MovieDetail() {
 
             {/* Description */}
             <div className="mb-6">
-              <h3 className="mb-2 text-lg font-semibold text-foreground">เรื่องย่อ</h3>
-              <p className="leading-relaxed text-muted-foreground">{movie.desc}</p>
+              <h3 className="mb-2 text-lg font-semibold text-foreground">
+                เรื่องย่อ
+              </h3>
+              <p className="leading-relaxed text-muted-foreground">
+                {movie.desc}
+              </p>
             </div>
 
             {/* Video Player */}
@@ -239,7 +252,7 @@ export default function MovieDetail() {
                 </h3>
                 <div className="aspect-video overflow-hidden rounded-lg bg-black shadow-lg shadow-accent/20">
                   <iframe
-                    src={currentEpisode.url}
+                    src={convertYoutubeUrl(currentEpisode.url)}
                     className="h-full w-full"
                     allowFullScreen
                     allow="autoplay"
@@ -280,10 +293,13 @@ export default function MovieDetail() {
               </h3>
 
               {user ? (
-                <form onSubmit={handleSubmitComment} className="mb-4 flex gap-2">
+                <form
+                  onSubmit={handleSubmitComment}
+                  className="mb-4 flex gap-2"
+                >
                   <Input
                     value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
+                    onChange={e => setCommentText(e.target.value)}
                     placeholder="แสดงความคิดเห็น..."
                     className="flex-1"
                     disabled={isSubmittingComment}
@@ -299,12 +315,18 @@ export default function MovieDetail() {
                 </form>
               ) : (
                 <div className="mb-4 flex items-center gap-2">
-                  <p className="text-sm text-muted-foreground">กรุณาเข้าสู่ระบบเพื่อแสดงความคิดเห็น</p>
+                  <p className="text-sm text-muted-foreground">
+                    กรุณาเข้าสู่ระบบเพื่อแสดงความคิดเห็น
+                  </p>
                   <Button
                     size="sm"
                     variant="outline"
                     className="gap-1"
-                    onClick={() => loginWithGoogle().catch((e) => toast.error("เข้าสู่ระบบไม่สำเร็จ"))}
+                    onClick={() =>
+                      loginWithGoogle().catch(e =>
+                        toast.error("เข้าสู่ระบบไม่สำเร็จ")
+                      )
+                    }
                   >
                     เข้าสู่ระบบด้วย Google
                   </Button>
@@ -313,9 +335,11 @@ export default function MovieDetail() {
 
               <div className="space-y-3">
                 {comments.length === 0 ? (
-                  <p className="py-4 text-sm text-muted-foreground">ยังไม่มีความคิดเห็น</p>
+                  <p className="py-4 text-sm text-muted-foreground">
+                    ยังไม่มีความคิดเห็น
+                  </p>
                 ) : (
-                  comments.map((c) => (
+                  comments.map(c => (
                     <div
                       key={c.id}
                       className="flex gap-3 rounded-lg border border-border bg-card p-3"
@@ -323,14 +347,18 @@ export default function MovieDetail() {
                       <Avatar className="h-9 w-9 shrink-0">
                         <AvatarImage src={c.userPhoto ?? undefined} />
                         <AvatarFallback className="bg-muted text-sm text-muted-foreground">
-                          {(c.userName || c.userEmail || "?").charAt(0).toUpperCase()}
+                          {(c.userName || c.userEmail || "?")
+                            .charAt(0)
+                            .toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-muted-foreground">
                           {c.userName || c.userEmail || "ผู้ใช้"}
                         </p>
-                        <p className="mt-0.5 break-words text-sm text-foreground">{c.text}</p>
+                        <p className="mt-0.5 break-words text-sm text-foreground">
+                          {c.text}
+                        </p>
                       </div>
                     </div>
                   ))

@@ -56,12 +56,9 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
-
-// --- นำเข้าการตั้งค่า Firebase ---
-// ตรวจสอบให้แน่ใจว่าไฟล์ firebaseConfig.ts อยู่ในโฟลเดอร์เดียวกันหรือตามโครงสร้าง src/firebaseConfig.ts
 import { firebaseConfig } from "../firebaseConfig";
 
-// --- การตั้งค่า API Keys (ดึงจาก .env) ---
+// --- การตั้งค่า ---
 const ADMIN_EMAIL = "duy.kan1234@gmail.com";
 const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
@@ -86,8 +83,8 @@ export interface Movie {
 // --- ฟังก์ชันช่วยเหลือ AI Gemini ---
 const callGemini = async (prompt: string, systemPrompt: string = "") => {
   if (!GEMINI_API_KEY) {
-    toast.error("ยังไม่ได้ตั้งค่า Gemini API Key ในไฟล์ .env");
-    return null;
+    toast.error("ยังไม่ได้ตั้งค่า Gemini API Key");
+    return;
   }
   try {
     const response = await fetch(
@@ -102,8 +99,8 @@ const callGemini = async (prompt: string, systemPrompt: string = "") => {
       }
     );
     if (!response.ok) {
-      toast.error("AI ไม่ตอบสนอง กรุณาตรวจสอบ API Key");
-      return null;
+      toast.error("เกิดข้อผิดพลาดจาก Gemini API");
+      return;
     }
     const result = await response.json();
     return result.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -111,6 +108,11 @@ const callGemini = async (prompt: string, systemPrompt: string = "") => {
     toast.error("ไม่สามารถเชื่อมต่อ AI ได้");
     return null;
   }
+};
+
+const generateAIImage = async (prompt: string) => {
+  // ตัวอย่างการสร้างรูปภาพ (Placeholder)
+  return `https://dummyimage.com/600x900/1a1a1a/ffffff&text=${encodeURIComponent(prompt)}`;
 };
 
 export default function AdminPanel() {
@@ -124,6 +126,7 @@ export default function AdminPanel() {
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [isFetchingYoutube, setIsFetchingYoutube] = useState(false);
   const [isAILoading, setIsAILoading] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(false);
 
   const [formData, setFormData] = useState<Movie>({
     title: "",
@@ -135,7 +138,7 @@ export default function AdminPanel() {
     episodes: [],
   });
 
-  // 1. ตรวจสอบสิทธิ์การเข้าถึง
+  // 1. ตรวจสอบสิทธิ์
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, currentUser => {
       setUser(currentUser);
@@ -145,7 +148,7 @@ export default function AdminPanel() {
     return () => unsubscribe();
   }, []);
 
-  // 2. ดึงข้อมูลหนังทั้งหมดจาก Firestore
+  // 2. ดึงข้อมูล
   useEffect(() => {
     if (!isAdmin) {
       setMovies([]);
@@ -162,8 +165,8 @@ export default function AdminPanel() {
         setMovies(moviesList);
       },
       error => {
-        console.error("Firestore Error:", error);
-        toast.error("โหลดข้อมูลล้มเหลว");
+        console.error("Firestore read error:", error);
+        toast.error("ไม่สามารถโหลดข้อมูลได้");
       }
     );
     return () => unsubscribe();
@@ -172,9 +175,9 @@ export default function AdminPanel() {
   const handleSignIn = async () => {
     try {
       await signInWithPopup(auth, provider);
-      toast.success("ยินดีต้อนรับครับ");
+      toast.success("เข้าสู่ระบบสำเร็จ");
     } catch (error) {
-      toast.error("เข้าสู่ระบบไม่สำเร็จ");
+      toast.error("เข้าสู่ระบบล้มเหลว");
     }
   };
 
@@ -210,21 +213,22 @@ export default function AdminPanel() {
     e.preventDefault();
     if (!isAdmin) return;
     if (!formData.title || !formData.poster) {
-      toast.error("กรุณากรอกชื่อเรื่องและรูปโปสเตอร์");
+      toast.error("กรุณากรอกชื่อเรื่องและ URL โปสเตอร์");
       return;
     }
 
     try {
       if (editingId) {
         await updateDoc(doc(db, "movies", editingId), { ...formData });
-        toast.success("อัปเดตข้อมูลเรียบร้อย");
+        toast.success("อัปเดตข้อมูลสำเร็จ");
       } else {
         await addDoc(collection(db, "movies"), formData);
-        toast.success("เพิ่มข้อมูลใหม่สำเร็จ");
+        toast.success("เพิ่มข้อมูลสำเร็จ");
       }
       resetForm();
     } catch (error) {
-      toast.error("เกิดข้อผิดพลาดในการบันทึก");
+      console.error("Save error:", error);
+      toast.error("บันทึกข้อมูลล้มเหลว");
     }
   };
 
@@ -235,7 +239,7 @@ export default function AdminPanel() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!isAdmin || !confirm("ยืนยันการลบข้อมูลนี้?")) return;
+    if (!isAdmin || !confirm("ต้องการลบข้อมูลนี้ใช่หรือไม่?")) return;
     try {
       await deleteDoc(doc(db, "movies", id));
       toast.success("ลบข้อมูลสำเร็จ");
@@ -244,16 +248,15 @@ export default function AdminPanel() {
     }
   };
 
-  // --- ฟังก์ชัน AI และการดึงข้อมูล ---
-
+  // --- ฟังก์ชัน AI ---
   const handleAISummarize = async (content: string) => {
     if (!content) return;
     setIsAILoading(true);
     try {
-      const prompt = `ช่วยเขียนเรื่องย่อหนังเรื่องนี้ให้สั้น กระชับ น่าติดตาม และเป็นภาษาไทยที่สละสลวย: ${content}`;
+      const prompt = `สรุปเนื้อหาหนังเรื่องนี้ให้กระชับ น่าสนใจ และน่าติดตาม โดยใช้ภาษาไทยที่สละสลวย: ${content}`;
       const summary = await callGemini(
         prompt,
-        "คุณเป็นนักเขียนคำโปรยหนังมืออาชีพ"
+        "คุณเป็นนักเขียนคำโปรยหนังมืออาชีพที่เชี่ยวชาญการสรุปเนื้อหาให้น่าสนใจ"
       );
       if (summary) setFormData(prev => ({ ...prev, desc: summary.trim() }));
     } finally {
@@ -268,7 +271,7 @@ export default function AdminPanel() {
       const prompt = `แนะนำคำสั้นๆ 1-2 คำ (เช่น แนวหนัง หรือจุดเด่น) สำหรับหนังชื่อ: "${formData.title}"`;
       const badge = await callGemini(
         prompt,
-        "ตอบเพียงคำที่แนะนำเท่านั้นเป็นภาษาไทย"
+        "ตอบเพียงคำที่แนะนำเท่านั้นเป็นภาษาไทย ไม่ต้องมีเครื่องหมายคำพูด"
       );
       if (badge)
         setFormData(prev => ({
@@ -280,13 +283,22 @@ export default function AdminPanel() {
     }
   };
 
+  const handleAIGeneratePoster = async () => {
+    if (!formData.title) return;
+    setIsImageLoading(true);
+    try {
+      const imageUrl = await generateAIImage(formData.title);
+      if (imageUrl) setFormData(prev => ({ ...prev, poster: imageUrl }));
+    } finally {
+      setIsImageLoading(false);
+    }
+  };
+
   const handleAIImport = useCallback(async (targetUrl: string) => {
-    if (!targetUrl) return;
-    if (!YOUTUBE_API_KEY) {
-      toast.error("กรุณาตั้งค่า VITE_YOUTUBE_API_KEY ในไฟล์ .env");
+    if (!targetUrl || !YOUTUBE_API_KEY) {
+      if (!YOUTUBE_API_KEY) toast.error("ไม่ได้ตั้งค่า YouTube API Key");
       return;
     }
-
     setIsFetchingYoutube(true);
     try {
       const videoId = targetUrl.match(/(?:v=|\/)([0-9A-Za-z_-]{11}).*/)?.[1];
@@ -296,7 +308,6 @@ export default function AdminPanel() {
         );
         const vData = await vRes.json();
         const snippet = vData.items?.[0]?.snippet;
-
         if (snippet) {
           const rawTitle = snippet.title;
           const rawDesc = snippet.description;
@@ -314,17 +325,14 @@ export default function AdminPanel() {
                 : [{ url: targetUrl, title: rawTitle }],
           }));
 
-          // เรียก AI สรุปเนื้อหาอัตโนมัติ
+          // เรียกใช้ AI สรุปเนื้อหาอัตโนมัติจากคำอธิบาย YouTube
           await handleAISummarize(rawDesc);
-          toast.success("ดึงข้อมูลและสรุปด้วย AI สำเร็จ");
-        } else {
-          toast.error("ไม่พบข้อมูลวิดีโอ");
+
+          toast.success("ดึงข้อมูลและสรุปเนื้อหาด้วย AI สำเร็จ");
         }
-      } else {
-        toast.error("รูปแบบลิงก์ YouTube ไม่ถูกต้อง");
       }
     } catch (error) {
-      toast.error("การเชื่อมต่อล้มเหลว");
+      toast.error("ไม่สามารถดึงข้อมูลจาก YouTube ได้");
     } finally {
       setIsFetchingYoutube(false);
     }
@@ -341,7 +349,7 @@ export default function AdminPanel() {
       <div className="flex h-screen flex-col items-center justify-center gap-4 bg-slate-950 text-white">
         <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
         <p className="text-lg font-medium animate-pulse">
-          กำลังเตรียมระบบแอดมิน...
+          กำลังเตรียมข้อมูล...
         </p>
       </div>
     );
@@ -354,9 +362,11 @@ export default function AdminPanel() {
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/10">
               <Database className="h-6 w-6 text-blue-500" />
             </div>
-            <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
+            <CardTitle className="text-2xl font-bold">
+              แผงควบคุมแอดมิน
+            </CardTitle>
             <CardDescription className="text-slate-400">
-              สำหรับผู้ดูแลระบบเท่านั้น
+              กรุณาเข้าสู่ระบบด้วยบัญชีผู้ดูแลระบบ
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -369,7 +379,7 @@ export default function AdminPanel() {
             {user && !isAdmin && (
               <div className="mt-4 flex items-center gap-2 rounded-lg bg-red-500/10 p-3 text-sm text-red-400">
                 <AlertCircle className="h-4 w-4 shrink-0" />
-                <p>อีเมล {user.email} ไม่มีสิทธิ์ใช้งานส่วนนี้</p>
+                <p>อีเมล {user.email} ไม่มีสิทธิ์เข้าถึงหน้านี้</p>
               </div>
             )}
           </CardContent>
@@ -380,25 +390,32 @@ export default function AdminPanel() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200">
-      {/* Navbar */}
+      {/* ส่วนหัว */}
       <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
         <div className="container mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-lg shadow-blue-600/20">
               <Database className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-lg font-bold">ระบบจัดการเนื้อหา</h1>
+            <div>
+              <h1 className="text-lg font-bold leading-none">
+                ระบบจัดการเนื้อหา
+              </h1>
+              <p className="text-xs text-slate-500">Admin Dashboard v2.0</p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="hidden flex-col items-end sm:flex">
-              <span className="text-sm font-medium">{user?.displayName}</span>
+              <span className="text-sm font-medium">
+                {user?.displayName || "แอดมิน"}
+              </span>
               <span className="text-[10px] text-slate-500">{user?.email}</span>
             </div>
             <Button
               onClick={() => auth.signOut()}
               variant="outline"
               size="sm"
-              className="border-slate-800 hover:text-red-400"
+              className="border-slate-800 bg-transparent hover:bg-slate-900 hover:text-red-400"
             >
               <LogOut className="h-4 w-4 sm:mr-2" />
               <span className="hidden sm:inline">ออกจากระบบ</span>
@@ -409,32 +426,43 @@ export default function AdminPanel() {
 
       <main className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-          {/* ฟอร์มจัดการ (ซ้าย) */}
+          {/* ส่วนฟอร์ม (ซ้าย) */}
           <div className="lg:col-span-5 xl:col-span-4">
-            <Card className="sticky top-24 border-slate-800 bg-slate-900 text-white shadow-xl overflow-hidden">
-              <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 to-purple-600" />
+            <Card className="sticky top-24 border-slate-800 bg-slate-900 text-white shadow-xl">
+              <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600" />
               <CardHeader>
-                <CardTitle className="text-xl">
-                  {editingId ? "แก้ไขข้อมูล" : "เพิ่มเนื้อหาใหม่"}
-                </CardTitle>
-                <CardDescription className="text-slate-400 text-xs">
-                  วางลิงก์ YouTube เพื่อดึงข้อมูลและสรุปด้วย AI อัตโนมัติ
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl">
+                    {editingId ? "แก้ไขข้อมูล" : "เพิ่มเนื้อหาใหม่"}
+                  </CardTitle>
+                  {editingId && (
+                    <Badge
+                      variant="outline"
+                      className="border-blue-500/50 text-blue-400"
+                    >
+                      โหมดแก้ไข
+                    </Badge>
+                  )}
+                </div>
+                <CardDescription className="text-slate-400">
+                  กรอกข้อมูลหรือวางลิงก์ YouTube เพื่อดึงข้อมูลอัตโนมัติ
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="space-y-4">
-                    {/* ส่วนดึงข้อมูล YouTube */}
-                    <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
+                    {/* YouTube Import */}
+                    <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 transition-all focus-within:border-blue-500/40">
                       <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-blue-400">
-                        <Youtube className="h-4 w-4" /> ดึงข้อมูลอัตโนมัติ
+                        <Youtube className="h-4 w-4" /> ดึงข้อมูลอัตโนมัติจาก
+                        YouTube
                       </label>
                       <div className="flex gap-2">
                         <Input
                           value={youtubeUrl}
                           onChange={e => setYoutubeUrl(e.target.value)}
-                          placeholder="วางลิงก์ YouTube..."
-                          className="border-slate-700 bg-slate-800 text-sm"
+                          placeholder="วางลิงก์ YouTube ที่นี่..."
+                          className="border-slate-700 bg-slate-800 text-sm focus:ring-blue-500"
                         />
                         <Button
                           type="button"
@@ -451,9 +479,10 @@ export default function AdminPanel() {
                         </Button>
                       </div>
                       {isFetchingYoutube && (
-                        <p className="mt-2 text-[10px] text-blue-400 animate-pulse">
-                          กำลังดึงข้อมูลและสรุปด้วย AI...
-                        </p>
+                        <div className="mt-2 flex items-center gap-2 text-[10px] text-blue-400">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          <span>กำลังดึงข้อมูลและสรุปด้วย AI...</span>
+                        </div>
                       )}
                     </div>
 
@@ -466,7 +495,7 @@ export default function AdminPanel() {
                         onChange={e =>
                           setFormData({ ...formData, title: e.target.value })
                         }
-                        placeholder="ระบุชื่อเรื่อง"
+                        placeholder="ระบุชื่อหนังหรือซีรีส์"
                         className="border-slate-700 bg-slate-800"
                         required
                       />
@@ -475,14 +504,14 @@ export default function AdminPanel() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <label className="text-xs font-medium text-slate-400">
-                          เรื่องย่อ (AI สรุปให้)
+                          เรื่องย่อ (AI สรุปให้ตอนดึงลิงก์)
                         </label>
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           onClick={() => handleAISummarize(formData.desc)}
-                          className="h-7 text-[10px] text-purple-400 hover:bg-purple-500/10"
+                          className="h-7 text-[10px] text-purple-400 hover:bg-purple-500/10 hover:text-purple-300"
                           disabled={isAILoading || !formData.desc}
                         >
                           {isAILoading ? (
@@ -498,8 +527,8 @@ export default function AdminPanel() {
                         onChange={e =>
                           setFormData({ ...formData, desc: e.target.value })
                         }
-                        placeholder="รายละเอียด..."
-                        className="min-h-[100px] border-slate-700 bg-slate-800 text-sm"
+                        placeholder="รายละเอียดเนื้อหา..."
+                        className="min-h-[120px] border-slate-700 bg-slate-800 text-sm"
                       />
                     </div>
 
@@ -533,7 +562,7 @@ export default function AdminPanel() {
                           <button
                             type="button"
                             onClick={handleAIGenerateBadge}
-                            className="text-purple-400"
+                            className="text-purple-400 hover:text-purple-300"
                           >
                             <Wand2 className="h-3 w-3" />
                           </button>
@@ -543,7 +572,7 @@ export default function AdminPanel() {
                           onChange={e =>
                             setFormData({ ...formData, badge: e.target.value })
                           }
-                          placeholder="เช่น ใหม่"
+                          placeholder="เช่น ใหม่, แนะนำ"
                           className="border-slate-700 bg-slate-800"
                         />
                       </div>
@@ -553,15 +582,31 @@ export default function AdminPanel() {
                       <label className="text-xs font-medium text-slate-400">
                         รูปโปสเตอร์ (URL)
                       </label>
-                      <Input
-                        value={formData.poster}
-                        onChange={e =>
-                          setFormData({ ...formData, poster: e.target.value })
-                        }
-                        placeholder="https://..."
-                        className="border-slate-700 bg-slate-800 text-sm"
-                        required
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          value={formData.poster}
+                          onChange={e =>
+                            setFormData({ ...formData, poster: e.target.value })
+                          }
+                          placeholder="https://..."
+                          className="border-slate-700 bg-slate-800 text-sm"
+                          required
+                        />
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="outline"
+                          className="shrink-0 border-slate-700 bg-slate-800 hover:bg-slate-700"
+                          onClick={handleAIGeneratePoster}
+                          disabled={isImageLoading || !formData.title}
+                        >
+                          {isImageLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <ImageIcon className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-800/50 p-3">
@@ -571,13 +616,13 @@ export default function AdminPanel() {
                           setFormData({ ...formData, isVip: v })
                         }
                         id="vip"
-                        className="data-[state=checked]:bg-yellow-500 border-slate-600"
+                        className="border-slate-600 data-[state=checked]:bg-yellow-500 data-[state=checked]:border-yellow-500"
                       />
                       <label
                         htmlFor="vip"
                         className="cursor-pointer text-sm font-medium text-slate-300"
                       >
-                        สมาชิก VIP เท่านั้น
+                        เนื้อหาสำหรับสมาชิก VIP เท่านั้น
                       </label>
                     </div>
                   </div>
@@ -586,24 +631,27 @@ export default function AdminPanel() {
                     <div className="mb-3 flex items-center justify-between">
                       <span className="text-sm font-bold flex items-center gap-2">
                         <ListIcon className="h-4 w-4 text-blue-500" />
-                        ตอนทั้งหมด ({formData.episodes.length})
+                        รายการตอน ({formData.episodes.length})
                       </span>
                       <Button
                         type="button"
                         onClick={handleAddEpisode}
                         size="sm"
                         variant="outline"
-                        className="h-8 border-slate-700 bg-slate-800 text-xs"
+                        className="h-8 border-slate-700 bg-slate-800 text-xs hover:bg-slate-700"
                       >
                         <Plus className="mr-1 h-3 w-3" /> เพิ่มตอน
                       </Button>
                     </div>
-                    <div className="max-h-[150px] space-y-2 overflow-y-auto pr-2">
+                    <div className="max-h-[200px] space-y-2 overflow-y-auto pr-2 custom-scrollbar">
                       {formData.episodes.map((ep, i) => (
                         <div
                           key={i}
-                          className="flex gap-2 items-center rounded-lg border border-slate-800 bg-slate-950 p-2"
+                          className="group flex gap-2 items-center rounded-lg border border-slate-800 bg-slate-950 p-2 transition-all hover:border-slate-700"
                         >
+                          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-slate-800 text-[10px] font-bold text-slate-400">
+                            {i + 1}
+                          </div>
                           <Input
                             value={ep.url}
                             onChange={e => {
@@ -611,35 +659,49 @@ export default function AdminPanel() {
                               n[i].url = e.target.value;
                               setFormData({ ...formData, episodes: n });
                             }}
-                            className="h-8 border-none bg-transparent text-xs"
-                            placeholder={`URL ตอนที่ ${i + 1}`}
+                            className="h-8 border-none bg-transparent text-xs focus-visible:ring-0"
+                            placeholder="วาง URL วิดีโอที่นี่"
                           />
                           <Button
                             type="button"
                             onClick={() => handleRemoveEpisode(i)}
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-slate-500 hover:text-red-500"
+                            className="h-8 w-8 text-slate-500 hover:bg-red-500/10 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       ))}
+                      {formData.episodes.length === 0 && (
+                        <p className="py-4 text-center text-xs text-slate-500 italic">
+                          ยังไม่มีข้อมูลตอน
+                        </p>
+                      )}
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-2 pt-2">
                     <Button
                       type="submit"
-                      className="w-full bg-blue-600 py-6 text-lg font-bold shadow-lg hover:bg-blue-700"
+                      className="w-full bg-blue-600 py-6 text-lg font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all active:scale-[0.98]"
                     >
-                      {editingId ? "อัปเดตข้อมูล" : "บันทึกข้อมูล"}
+                      {editingId ? (
+                        <>
+                          <Edit2 className="mr-2 h-5 w-5" /> อัปเดตข้อมูล
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="mr-2 h-5 w-5" />{" "}
+                          บันทึกข้อมูลลงระบบ
+                        </>
+                      )}
                     </Button>
                     {editingId && (
                       <Button
                         type="button"
                         variant="ghost"
-                        className="w-full text-slate-400"
+                        className="w-full text-slate-400 hover:text-white"
                         onClick={resetForm}
                       >
                         ยกเลิกการแก้ไข
@@ -651,17 +713,22 @@ export default function AdminPanel() {
             </Card>
           </div>
 
-          {/* รายการเนื้อหา (ขวา) */}
+          {/* ส่วนรายการ (ขวา) */}
           <div className="lg:col-span-7 xl:col-span-8 space-y-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <h3 className="text-2xl font-bold">
-                คลังเนื้อหา ({movies.length})
-              </h3>
+              <div>
+                <h3 className="text-2xl font-bold text-white">
+                  คลังเนื้อหาทั้งหมด
+                </h3>
+                <p className="text-sm text-slate-500">
+                  มีทั้งหมด {movies.length} รายการในระบบ
+                </p>
+              </div>
               <div className="relative w-full sm:w-72">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
                 <Input
-                  placeholder="ค้นหา..."
-                  className="pl-10 border-slate-800 bg-slate-900"
+                  placeholder="ค้นหาชื่อเรื่อง..."
+                  className="pl-10 border-slate-800 bg-slate-900 focus:ring-blue-500"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                 />
@@ -672,16 +739,16 @@ export default function AdminPanel() {
               {filteredMovies.map(movie => (
                 <div
                   key={movie.id}
-                  className="group relative flex gap-4 rounded-2xl border border-slate-800 bg-slate-900/50 p-3 hover:bg-slate-900 transition-all"
+                  className="group relative flex gap-4 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 p-3 transition-all hover:border-slate-700 hover:bg-slate-900"
                 >
-                  <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-xl bg-slate-800">
+                  <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-xl bg-slate-800 shadow-lg">
                     <img
                       src={movie.poster}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                       alt={movie.title}
                     />
                     {movie.isVip && (
-                      <div className="absolute left-0 top-0 bg-yellow-500 px-2 py-0.5 text-[10px] font-black text-slate-950">
+                      <div className="absolute left-0 top-0 rounded-br-lg bg-yellow-500 px-2 py-0.5 text-[10px] font-black text-slate-950 shadow-md">
                         VIP
                       </div>
                     )}
@@ -690,28 +757,42 @@ export default function AdminPanel() {
                   <div className="flex flex-1 flex-col justify-between py-1 min-w-0">
                     <div>
                       <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-bold truncate">{movie.title}</h4>
+                        <h4 className="font-bold text-slate-100 group-hover:text-blue-400 transition-colors truncate">
+                          {movie.title}
+                        </h4>
                         {movie.badge && (
-                          <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[9px]">
+                          <Badge
+                            variant="secondary"
+                            className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[9px] px-1.5 py-0 shrink-0"
+                          >
                             {movie.badge}
                           </Badge>
                         )}
                       </div>
-                      <p className="mt-2 text-xs text-slate-400 line-clamp-3">
+                      <p className="mt-2 text-xs leading-relaxed text-slate-400 line-clamp-3">
                         {movie.desc}
                       </p>
                     </div>
 
                     <div className="mt-3 flex items-center justify-between">
-                      <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                        <ListIcon className="h-3 w-3" /> {movie.episodes.length}{" "}
-                        ตอน
-                      </span>
-                      <div className="flex gap-1">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                          <LayoutGrid className="h-3 w-3" />
+                          {movie.category === "series"
+                            ? "ซีรีส์"
+                            : "หนังตอนเดียว"}
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                          <ListIcon className="h-3 w-3" />
+                          {movie.episodes.length} ตอน
+                        </div>
+                      </div>
+
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-8 w-8 bg-slate-800 hover:bg-blue-600"
+                          className="h-8 w-8 rounded-lg bg-slate-800 text-slate-400 hover:bg-blue-600 hover:text-white"
                           onClick={() => handleEdit(movie)}
                         >
                           <Edit2 className="h-3.5 w-3.5" />
@@ -719,7 +800,7 @@ export default function AdminPanel() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-8 w-8 bg-slate-800 hover:bg-red-600"
+                          className="h-8 w-8 rounded-lg bg-slate-800 text-slate-400 hover:bg-red-600 hover:text-white"
                           onClick={() => handleDelete(movie.id)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -729,10 +810,36 @@ export default function AdminPanel() {
                   </div>
                 </div>
               ))}
+
+              {filteredMovies.length === 0 && (
+                <div className="col-span-full flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-800 py-20 text-slate-500">
+                  <Search className="mb-4 h-12 w-12 opacity-20" />
+                  <p className="text-lg font-medium">ไม่พบข้อมูลที่ค้นหา</p>
+                  <p className="text-sm opacity-60">
+                    ลองเปลี่ยนคำค้นหาหรือเพิ่มข้อมูลใหม่
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </main>
+
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #1e293b;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #334155;
+        }
+      `}</style>
     </div>
   );
 }

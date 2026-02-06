@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ฟังก์ชันตรวจสอบว่าเป็น Admin หรือไม่
+    function isAdmin() {
+      return request.auth != null && 
+             request.auth.token.email == 'duy.kan1234@gmail.com' &&
+             request.auth.token.email_verified == true;
+    }
+
+    match /artifacts/{movieId} {
+      // 1. ทุกคนอ่านข้อมูลได้
+      allow read: if true;
+      
+      // 2. Admin เท่านั้นที่สร้างหรือลบได้
+      allow create, delete: if isAdmin();
+      
+      // 3. การแก้ไข: Admin แก้ได้หมด หรือ คนทั่วไปแก้ได้แค่ viewCount (+1 เท่านั้น)
+      allow update: if isAdmin() || 
+                    (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']) &&
+                     request.resource.data.viewCount == resource.data.viewCount + 1);
+    }
+  }
+}

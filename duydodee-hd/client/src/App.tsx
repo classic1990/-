@@ -8,7 +8,6 @@ import Home from "./pages/Home";
 import MovieDetail from "./pages/MovieDetail";
 import AdminPanel from "./pages/AdminPanel";
 
-
 function Router() {
   return (
     <Switch>
@@ -25,9 +24,7 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="dark"
-      >
+      <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <Toaster />
           <Router />

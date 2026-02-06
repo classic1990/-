@@ -9,15 +9,19 @@ import { useLocation } from "wouter";
 
 export default function Home() {
   const [movies, setMovies] = useState<(Movie & { id: string })[]>([]);
-  const [filteredMovies, setFilteredMovies] = useState<(Movie & { id: string })[]>([]);
+  const [filteredMovies, setFilteredMovies] = useState<
+    (Movie & { id: string })[]
+  >([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<"all" | "vertical" | "series">("all");
+  const [selectedCategory, setSelectedCategory] = useState<
+    "all" | "vertical" | "series"
+  >("all");
   const [loading, setLoading] = useState(true);
   const [, setLocation] = useLocation();
 
   useEffect(() => {
     setLoading(true);
-    const unsubscribe = subscribeToMovies((moviesData) => {
+    const unsubscribe = subscribeToMovies(moviesData => {
       setMovies(moviesData);
       setLoading(false);
     });
@@ -36,9 +40,10 @@ export default function Home() {
     // Filter by search term
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(movie =>
-        movie.title.toLowerCase().includes(term) ||
-        movie.desc.toLowerCase().includes(term)
+      filtered = filtered.filter(
+        movie =>
+          movie.title.toLowerCase().includes(term) ||
+          movie.desc.toLowerCase().includes(term)
       );
     }
 
@@ -98,34 +103,59 @@ export default function Home() {
                 type="text"
                 placeholder="ค้นหาหนัง..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="pl-10 py-3 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
               />
             </div>
           </div>
 
           {/* Category Tabs */}
-          <Tabs value={selectedCategory} onValueChange={(val) => setSelectedCategory(val as any)} className="w-full">
+          <Tabs
+            value={selectedCategory}
+            onValueChange={val => setSelectedCategory(val as any)}
+            className="w-full"
+          >
             <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 bg-slate-800">
-              <TabsTrigger value="all" className="data-[state=active]:bg-cyan-500 data-[state=active]:text-white">
+              <TabsTrigger
+                value="all"
+                className="data-[state=active]:bg-cyan-500 data-[state=active]:text-white"
+              >
                 ทั้งหมด
               </TabsTrigger>
-              <TabsTrigger value="vertical" className="data-[state=active]:bg-cyan-500 data-[state=active]:text-white">
+              <TabsTrigger
+                value="vertical"
+                className="data-[state=active]:bg-cyan-500 data-[state=active]:text-white"
+              >
                 ซีรีส์สั้น ({verticalCount})
               </TabsTrigger>
-              <TabsTrigger value="series" className="data-[state=active]:bg-cyan-500 data-[state=active]:text-white">
+              <TabsTrigger
+                value="series"
+                className="data-[state=active]:bg-cyan-500 data-[state=active]:text-white"
+              >
                 ซีรีส์ยาว ({seriesCount})
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="all" className="mt-8">
-              <MovieGrid movies={filteredMovies} loading={loading} onMovieClick={handleMovieClick} />
+              <MovieGrid
+                movies={filteredMovies}
+                loading={loading}
+                onMovieClick={handleMovieClick}
+              />
             </TabsContent>
             <TabsContent value="vertical" className="mt-8">
-              <MovieGrid movies={filteredMovies} loading={loading} onMovieClick={handleMovieClick} />
+              <MovieGrid
+                movies={filteredMovies}
+                loading={loading}
+                onMovieClick={handleMovieClick}
+              />
             </TabsContent>
             <TabsContent value="series" className="mt-8">
-              <MovieGrid movies={filteredMovies} loading={loading} onMovieClick={handleMovieClick} />
+              <MovieGrid
+                movies={filteredMovies}
+                loading={loading}
+                onMovieClick={handleMovieClick}
+              />
             </TabsContent>
           </Tabs>
         </div>
@@ -137,7 +167,7 @@ export default function Home() {
 function MovieGrid({
   movies,
   loading,
-  onMovieClick
+  onMovieClick,
 }: {
   movies: (Movie & { id: string })[];
   loading: boolean;

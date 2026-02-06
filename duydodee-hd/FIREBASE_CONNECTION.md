@@ -7,12 +7,14 @@
 ## 📋 สรุปการตั้งค่า
 
 ### Firebase Project Information
+
 - **Project ID**: `classic-e8ab7`
 - **Project Number**: `596308927760`
 - **App ID**: `1:596308927760:web:63043fd2786459082cb195`
 - **Admin Email**: `duy.kan1234@gmail.com`
 
 ### Collections ที่ใช้
+
 - **`artifacts`** - เก็บข้อมูลหนัง/ซีรีส์
 - **`comments`** - เก็บข้อมูลคอมเมนต์ (ถ้ามี)
 
@@ -52,14 +54,18 @@ pnpm dev
 ## 📁 ไฟล์ที่เกี่ยวข้อง
 
 ### `client/src/lib/firebase.ts`
+
 ไฟล์หลักสำหรับการเชื่อมต่อ Firebase:
+
 - ✅ ใช้ environment variables (พร้อม fallback เป็นค่า default)
 - ✅ Type safety ที่ดีขึ้น
 - ✅ Error handling ที่ครบถ้วน
 - ✅ Performance optimization สำหรับ `incrementViewCount`
 
 ### `firestore.rules`
+
 Security rules สำหรับ Firestore:
+
 - ✅ Public read access
 - ✅ Admin-only create/update
 - ✅ View count สามารถอัปเดตได้โดยทุกคน
@@ -70,6 +76,7 @@ Security rules สำหรับ Firestore:
 ### ตรวจสอบการเชื่อมต่อ
 
 1. **รัน development server**:
+
    ```bash
    pnpm dev
    ```
@@ -90,6 +97,7 @@ Security rules สำหรับ Firestore:
 **สาเหตุ**: Domain ไม่ได้ถูกเพิ่มใน Authorized domains
 
 **วิธีแก้**:
+
 1. ไปที่ Firebase Console > Authentication > Settings
 2. เพิ่ม domain ในส่วน "Authorized domains"
 3. สำหรับ local development: เพิ่ม `localhost`
@@ -99,6 +107,7 @@ Security rules สำหรับ Firestore:
 **สาเหตุ**: Security Rules ไม่ถูกต้อง หรือ email ไม่ตรงกับ admin
 
 **วิธีแก้**:
+
 1. ตรวจสอบ Firestore Rules ใน Firebase Console
 2. ตรวจสอบว่าใช้ email `duy.kan1234@gmail.com` ในการล็อกอิน
 3. Deploy rules ใหม่: `firebase deploy --only firestore:rules`
@@ -108,6 +117,7 @@ Security rules สำหรับ Firestore:
 **สาเหตุ**: ยังไม่มีข้อมูลใน Firestore
 
 **วิธีแก้**:
+
 1. ไปที่ Firebase Console > Firestore Database
 2. เพิ่มข้อมูลตัวอย่างใน collection `artifacts`
 3. หรือใช้ Admin Panel เพื่อเพิ่มข้อมูล
@@ -117,6 +127,7 @@ Security rules สำหรับ Firestore:
 **สาเหตุ**: Vite ต้อง restart เมื่อเพิ่ม/แก้ไข `.env`
 
 **วิธีแก้**:
+
 1. หยุด development server (Ctrl+C)
 2. รันใหม่: `pnpm dev`
 3. ตรวจสอบว่าไฟล์ `.env` อยู่ใน root directory
@@ -124,14 +135,17 @@ Security rules สำหรับ Firestore:
 ## 📊 Firebase Services ที่ใช้
 
 ### ✅ Firestore Database
+
 - เก็บข้อมูลหนัง/ซีรีส์
 - Real-time updates ด้วย `onSnapshot`
 
 ### ✅ Firebase Authentication
+
 - Google Sign-In สำหรับ Admin
 - Email verification
 
 ### ✅ Firebase Hosting (Optional)
+
 - สำหรับ deploy production
 
 ## 🔐 Security Best Practices

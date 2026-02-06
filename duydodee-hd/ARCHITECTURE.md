@@ -1,11 +1,13 @@
 # DUYDODEE-HD Architecture & Security Plan
 
 ## Project Overview
+
 DUYDODEE-HD is a movie streaming web application with a secure admin panel for content management. The system separates public-facing content viewing from restricted administrative functions.
 
 ## System Architecture
 
 ### Frontend Structure
+
 ```
 duydodee-hd/
 ├── client/
@@ -29,6 +31,7 @@ duydodee-hd/
 ## Firebase Setup
 
 ### Collections Structure
+
 ```
 Firestore:
 ├── artifacts/
@@ -50,11 +53,13 @@ Firestore:
 ## Security Rules
 
 ### Authentication Strategy
+
 - **Public Access**: ทุกคนสามารถดูหนังได้โดยไม่ต้องล็อกอิน
 - **Admin Access**: เฉพาะ duy.kan1234@gmail.com เท่านั้นที่สามารถแก้ไข/เพิ่ม/ลบข้อมูล
 - **Login Method**: Google Sign-In (Firebase Authentication)
 
 ### Firestore Security Rules
+
 ```
 1. Read (artifacts): ✅ Public - ทุกคนอ่านได้
 2. Create (artifacts): ✅ Admin only - ต้อง email === 'duy.kan1234@gmail.com'
@@ -66,6 +71,7 @@ Firestore:
 ## Frontend Features
 
 ### Public Pages
+
 1. **Home Page** - แสดงหนังทั้งหมด
    - Grid layout ของหนัง
    - Search & filter
@@ -79,6 +85,7 @@ Firestore:
    - View counter
 
 ### Admin Features
+
 1. **Admin Login** - Google Sign-In
    - Email verification (duy.kan1234@gmail.com only)
    - Auto-logout if not authorized
@@ -96,11 +103,13 @@ Firestore:
 ## Design System
 
 ### Color Palette
+
 - **Primary**: #00e5ff (Cyan)
 - **VIP**: #ffd700 (Gold)
 - **Background**: #0a0a0c (Dark)
 - **Text**: #ffffff (White)
 
 ### Typography
+
 - Font: 'Prompt' (Thai-friendly)
 - Weights: 300, 400, 500, 600, 700

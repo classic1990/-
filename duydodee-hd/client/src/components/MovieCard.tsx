@@ -18,8 +18,9 @@ export default function MovieCard({ movie, onClick }: MovieCardProps) {
           src={movie.poster}
           alt={movie.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-          onError={(e) => {
-            e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 600'%3E%3Crect fill='%231e293b' width='400' height='600'/%3E%3Ctext x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%2364748b' font-size='24' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E";
+          onError={e => {
+            e.currentTarget.src =
+              "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 600'%3E%3Crect fill='%231e293b' width='400' height='600'/%3E%3Ctext x='50%' y='50%' text-anchor='middle' dy='.3em' fill='%2364748b' font-size='24' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E";
           }}
         />
 

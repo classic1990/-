@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Share2, Facebook, Twitter, MessageCircle, Copy, Check } from "lucide-react";
+import {
+  Share2,
+  Facebook,
+  Twitter,
+  MessageCircle,
+  Copy,
+  Check,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -36,7 +43,8 @@ export default function ShareButton({ movie }: ShareButtonProps) {
 
   const shareData: ShareData = {
     title: movie.title,
-    description: movie.desc.substring(0, 100) + (movie.desc.length > 100 ? "..." : ""),
+    description:
+      movie.desc.substring(0, 100) + (movie.desc.length > 100 ? "..." : ""),
     url: `${typeof window !== "undefined" ? window.location.origin : ""}/movie/${movie.id}`,
     posterUrl: movie.poster,
   };
@@ -177,7 +185,9 @@ export default function ShareButton({ movie }: ShareButtonProps) {
             className="w-full flex items-center justify-center gap-2 p-3 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
           >
             <Copy className="w-5 h-5 text-slate-400" />
-            <span className="text-sm font-medium text-white">คัดลอกข้อความ</span>
+            <span className="text-sm font-medium text-white">
+              คัดลอกข้อความ
+            </span>
           </button>
 
           {/* Share Preview */}

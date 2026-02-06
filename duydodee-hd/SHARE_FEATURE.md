@@ -7,6 +7,7 @@
 ## Features
 
 ### Supported Platforms
+
 - ✅ Facebook
 - ✅ Twitter/X
 - ✅ Line
@@ -20,7 +21,9 @@
 ### Files Added
 
 #### 1. `client/src/lib/share.ts`
+
 Utility functions สำหรับการแชร์:
+
 - `shareToFacebook()` - แชร์ไปยัง Facebook
 - `shareToTwitter()` - แชร์ไปยัง Twitter
 - `shareToLine()` - แชร์ไปยัง Line
@@ -31,7 +34,9 @@ Utility functions สำหรับการแชร์:
 - `generateShareableUrl()` - สร้าง URL ที่แชร์ได้
 
 #### 2. `client/src/components/ShareButton.tsx`
+
 React component สำหรับแสดง Share Dialog:
+
 - Share Dialog Modal
 - Social Media Buttons
 - Copy Link Button
@@ -41,6 +46,7 @@ React component สำหรับแสดง Share Dialog:
 ### Integration
 
 #### MovieDetail Page
+
 ปุ่ม Share ถูกเพิ่มในหน้ารายละเอียดหนัง:
 
 ```tsx
@@ -65,6 +71,7 @@ React component สำหรับแสดง Share Dialog:
 ### Share Data
 
 ข้อมูลที่แชร์ประกอบด้วย:
+
 - ชื่อหนัง
 - เรื่องย่อ (100 ตัวอักษรแรก)
 - URL ของหนัง
@@ -109,26 +116,31 @@ interface ShareButtonProps {
 ## Social Media URLs
 
 ### Facebook Share
+
 ```
 https://www.facebook.com/sharer/sharer.php?u=[URL]&quote=[TEXT]
 ```
 
 ### Twitter Share
+
 ```
 https://twitter.com/intent/tweet?text=[TEXT]&url=[URL]&hashtags=[TAGS]
 ```
 
 ### Line Share
+
 ```
 https://social-plugins.line.me/web/share?url=[URL]&text=[TEXT]
 ```
 
 ### WhatsApp Share
+
 ```
 https://wa.me/?text=[TEXT]
 ```
 
 ### Telegram Share
+
 ```
 https://t.me/share/url?url=[URL]&text=[TEXT]
 ```
@@ -136,23 +148,27 @@ https://t.me/share/url?url=[URL]&text=[TEXT]
 ## Features
 
 ### 1. Social Media Integration
+
 - Direct links to social media platforms
 - Pre-filled content
 - Hashtags support
 
 ### 2. Copy to Clipboard
+
 - Copy full share link
 - Copy share text
 - Visual feedback (Check icon)
 - Toast notification
 
 ### 3. Share Dialog
+
 - Modal dialog for share options
 - Social media icons
 - Share preview
 - Responsive design
 
 ### 4. Error Handling
+
 - Try-catch blocks
 - Toast notifications for errors
 - Console logging
@@ -199,16 +215,19 @@ https://t.me/share/url?url=[URL]&text=[TEXT]
 ## Troubleshooting
 
 ### Share button not working
+
 - Check browser console for errors
 - Verify social media URLs are correct
 - Check if popups are blocked
 
 ### Copy to clipboard not working
+
 - Check browser permissions
 - Verify clipboard API support
 - Check for HTTPS (required for clipboard API)
 
 ### Social media not opening
+
 - Check if social media URLs are correct
 - Verify internet connection
 - Check browser popup settings
@@ -216,6 +235,7 @@ https://t.me/share/url?url=[URL]&text=[TEXT]
 ## Testing
 
 ### Manual Testing Checklist
+
 - [ ] Facebook share works
 - [ ] Twitter share works
 - [ ] Line share works
@@ -229,6 +249,7 @@ https://t.me/share/url?url=[URL]&text=[TEXT]
 - [ ] Mobile responsive
 
 ### Browser Testing
+
 - [ ] Chrome
 - [ ] Firefox
 - [ ] Safari
@@ -245,6 +266,7 @@ https://t.me/share/url?url=[URL]&text=[TEXT]
 ## Support
 
 For issues or questions about the share feature, check:
+
 1. Browser console for errors
 2. Network tab for failed requests
 3. Social media platform documentation
